@@ -1,0 +1,1271 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HAM FINANCE</title>
+<script src="https://unpkg.com/lucide@latest"></script>
+<style>
+:root{
+  --bg-0:#05070d;
+  --blue:#1e6bff;
+  --cyan:#22d3ee;
+  --white:#f8fafc;
+  --muted:#8b98ad;
+  --line:rgba(59,130,246,.16);
+  --glass:rgba(13,20,36,.62);
+  --green:#22c55e;
+  --red:#ef4444;
+  --radius:14px;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%}
+body{
+  font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;
+  background:var(--bg-0);color:var(--white);font-weight:700;
+  letter-spacing:.2px;overflow-x:hidden;-webkit-font-smoothing:antialiased;
+}
+.bg-fx{position:fixed;inset:0;z-index:-3;overflow:hidden;
+  background:radial-gradient(700px 400px at 10% -10%,rgba(30,107,255,.14),transparent 60%),
+  radial-gradient(600px 500px at 110% 20%,rgba(34,211,238,.08),transparent 55%),
+  var(--bg-0);}
+.orb{position:absolute;border-radius:50%;filter:blur(100px);opacity:.35;animation:float 20s ease-in-out infinite}
+.orb.a{width:340px;height:340px;background:#1e6bff;top:-100px;left:-90px}
+.orb.b{width:280px;height:280px;background:#22d3ee;bottom:-120px;right:-60px;animation-delay:-7s}
+@keyframes float{0%,100%{transform:translate(0,0)}50%{transform:translate(30px,-30px)}}
+.particles{position:fixed;inset:0;z-index:-2;pointer-events:none;overflow:hidden;filter:blur(2px)}
+.particle{position:absolute;border-radius:50%;background:rgba(34,211,238,.35);
+  box-shadow:0 0 40px 20px rgba(34,211,238,.15);animation:sway 14s ease-in-out infinite}
+.particle.blue{background:rgba(30,107,255,.4);box-shadow:0 0 40px 20px rgba(30,107,255,.18)}
+@keyframes sway{
+  0%,100%{transform:translate(0,0) scale(1);opacity:.35}
+  25%{transform:translate(30px,-40px) scale(1.15);opacity:.55}
+  50%{transform:translate(-20px,30px) scale(.9);opacity:.4}
+  75%{transform:translate(40px,20px) scale(1.1);opacity:.5}
+}
+.grid-overlay{position:fixed;inset:0;z-index:-1;pointer-events:none;
+  background-image:linear-gradient(rgba(59,130,246,.04) 1px,transparent 1px),
+  linear-gradient(90deg,rgba(59,130,246,.04) 1px,transparent 1px);
+  background-size:52px 52px;
+  mask-image:radial-gradient(circle at 50% 20%,#000 25%,transparent 80%);}
+.shell{max-width:1080px;margin:0 auto;padding:18px 18px 60px}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px}
+.brand{display:flex;align-items:center;gap:11px}
+.logo{width:40px;height:40px;border-radius:11px;display:grid;place-items:center;
+  background:linear-gradient(135deg,#1e6bff,#0a1a3d);
+  border:1px solid rgba(59,130,246,.5);
+  box-shadow:0 0 18px rgba(30,107,255,.45),inset 0 0 12px rgba(34,211,238,.2);
+  overflow:hidden;flex-shrink:0}
+.logo svg{width:20px;height:20px;color:#fff}
+.logo img{width:100%;height:100%;object-fit:cover;display:block}
+.brand h1{font-size:14px;letter-spacing:2.5px;font-weight:900;line-height:1}
+.brand h1 span{background:linear-gradient(90deg,#fff,#22d3ee);-webkit-background-clip:text;background-clip:text;color:transparent}
+.brand p{font-size:8.5px;color:var(--muted);letter-spacing:2px;margin-top:3px}
+.top-actions{display:flex;gap:8px;align-items:center}
+
+/* Banner */
+.banner{position:relative;width:100%;height:180px;border-radius:var(--radius);overflow:hidden;
+  margin-bottom:18px;border:1px solid var(--line);
+  background:linear-gradient(120deg,#0a1a3d,#0b3fb0 55%,#093a8c);
+  box-shadow:0 0 30px rgba(30,107,255,.18);
+  touch-action:pan-y;user-select:none;-webkit-user-select:none}
+.banner.dragging{cursor:grabbing}
+.banner:not(.dragging){cursor:grab}
+.banner.decorative{background-image:
+  radial-gradient(circle at 20% 30%,rgba(34,211,238,.35),transparent 45%),
+  radial-gradient(circle at 80% 70%,rgba(30,107,255,.4),transparent 50%),
+  linear-gradient(120deg,#0a1a3d,#0b3fb0 55%,#093a8c);}
+.banner.decorative::before{content:"";position:absolute;inset:0;
+  background-image:linear-gradient(rgba(255,255,255,.05) 1px,transparent 1px),
+  linear-gradient(90deg,rgba(255,255,255,.05) 1px,transparent 1px);
+  background-size:28px 28px;mask-image:linear-gradient(120deg,#000,transparent 70%)}
+.slide{position:absolute;inset:0;
+  transition:opacity .7s cubic-bezier(.4,0,.2,1),transform .7s cubic-bezier(.4,0,.2,1);
+  will-change:opacity,transform;opacity:0;pointer-events:none}
+.slide img{width:100%;height:100%;object-fit:cover;display:block;pointer-events:none;-webkit-user-drag:none}
+.slide.active{opacity:1;z-index:2;pointer-events:auto}
+.banner.dragging .slide{transition:none}
+.dots{position:absolute;bottom:12px;left:50%;transform:translateX(-50%);z-index:5;
+  display:flex;gap:7px;padding:6px 10px;border-radius:99px;
+  background:rgba(5,7,13,.5);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.08)}
+.dot-btn{width:7px;height:7px;border-radius:99px;background:rgba(255,255,255,.35);
+  cursor:pointer;border:none;transition:.35s;padding:0}
+.dot-btn.active{width:22px;background:linear-gradient(90deg,#1e6bff,#22d3ee);
+  box-shadow:0 0 10px rgba(34,211,238,.7)}
+.banner-nav{position:absolute;top:50%;transform:translateY(-50%);z-index:6;
+  width:32px;height:32px;border-radius:50%;display:grid;place-items:center;
+  background:rgba(5,7,13,.55);border:1px solid rgba(255,255,255,.12);color:#fff;
+  cursor:pointer;opacity:0;transition:.25s;backdrop-filter:blur(8px)}
+.banner-nav svg{width:16px;height:16px}
+.banner-nav.prev{left:10px}
+.banner-nav.next{right:10px}
+.banner:hover .banner-nav{opacity:1}
+.banner-nav:hover{background:rgba(30,107,255,.5);box-shadow:0 0 14px rgba(30,107,255,.5)}
+@media(hover:none){.banner-nav{display:none}}
+.hamburger{width:42px;height:42px;border-radius:11px;display:grid;place-items:center;cursor:pointer;
+  border:1px solid var(--line);background:rgba(30,107,255,.07);transition:.28s;position:relative;z-index:60}
+.hamburger:hover{border-color:rgba(59,130,246,.55);box-shadow:0 0 18px rgba(30,107,255,.35)}
+.hamburger .lines{width:18px;height:14px;position:relative}
+.hamburger .lines span{position:absolute;left:0;height:2px;width:100%;background:#fff;border-radius:2px;
+  transition:transform .35s cubic-bezier(.22,1,.36,1),opacity .25s,top .3s}
+.hamburger .lines span:nth-child(1){top:0}
+.hamburger .lines span:nth-child(2){top:6px}
+.hamburger .lines span:nth-child(3){top:12px}
+.hamburger.open .lines span:nth-child(1){top:6px;transform:rotate(45deg)}
+.hamburger.open .lines span:nth-child(2){opacity:0;transform:scaleX(0)}
+.hamburger.open .lines span:nth-child(3){top:6px;transform:rotate(-45deg)}
+.sidebar-back{position:fixed;inset:0;z-index:50;background:rgba(2,6,23,.55);
+  backdrop-filter:blur(6px);opacity:0;pointer-events:none;transition:.3s}
+.sidebar-back.open{opacity:1;pointer-events:auto}
+.sidebar{position:fixed;top:0;right:0;bottom:0;width:290px;max-width:82vw;z-index:55;
+  background:rgba(9,14,26,.92);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);
+  border-left:1px solid var(--line);padding:22px 18px;display:flex;flex-direction:column;gap:6px;
+  transform:translateX(100%);transition:transform .42s cubic-bezier(.22,1,.36,1);overflow-y:auto}
+.sidebar.open{transform:translateX(0)}
+.sidebar .sb-head{display:flex;align-items:center;gap:9px;padding:0 6px 16px;border-bottom:1px solid var(--line);margin-bottom:12px}
+.sidebar .sb-head svg{width:18px;height:18px;color:var(--cyan)}
+.sidebar .sb-head b{font-size:11px;letter-spacing:2.5px;color:var(--muted)}
+.sb-label{font-size:8.5px;letter-spacing:2px;color:var(--muted);padding:10px 8px 4px;font-weight:800}
+.sb-item{display:flex;align-items:center;gap:11px;padding:12px;border-radius:10px;cursor:pointer;
+  border:1px solid transparent;background:transparent;color:var(--white);font-family:inherit;
+  font-weight:800;font-size:12px;letter-spacing:1px;transition:.22s;text-align:left;width:100%}
+.sb-item svg{width:16px;height:16px;color:var(--muted);transition:.22s;flex-shrink:0}
+.sb-item:hover{background:rgba(30,107,255,.1);border-color:var(--line)}
+.sb-item:hover svg{color:var(--cyan)}
+.sb-item.danger{color:#fca5a5}
+.sb-item.danger svg{color:#ef4444}
+.sb-item.danger:hover{background:rgba(239,68,68,.12);border-color:rgba(239,68,68,.3)}
+.sb-divider{height:1px;background:var(--line);margin:10px 4px}
+.sb-note{padding:12px;border-radius:10px;background:rgba(30,107,255,.06);border:1px solid var(--line);margin-top:auto}
+.sb-note p{font-size:9.5px;color:var(--muted);line-height:1.7;letter-spacing:.6px;font-weight:700}
+.sb-note p b{color:var(--cyan)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;cursor:pointer;
+  border:1px solid var(--line);background:rgba(30,107,255,.07);color:var(--white);
+  padding:9px 13px;border-radius:10px;font-weight:800;font-size:11px;letter-spacing:1px;
+  font-family:inherit;transition:.22s;white-space:nowrap}
+.btn svg{width:14px;height:14px}
+.btn:hover{transform:translateY(-1px);border-color:rgba(59,130,246,.55);box-shadow:0 0 16px rgba(30,107,255,.3)}
+.btn.primary{background:linear-gradient(135deg,#1e6bff,#0b3fb0);border-color:rgba(59,130,246,.65);box-shadow:0 0 14px rgba(30,107,255,.35)}
+.btn.primary:hover{box-shadow:0 0 24px rgba(30,107,255,.6)}
+.btn.ghost{background:rgba(255,255,255,.03)}
+.btn.danger{background:rgba(239,68,68,.09);border-color:rgba(239,68,68,.3);color:#fca5a5}
+.btn.danger:hover{box-shadow:0 0 16px rgba(239,68,68,.35);border-color:rgba(239,68,68,.55)}
+.btn.small{padding:6px 10px;font-size:10px}
+.btn.small svg{width:12px;height:12px}
+.glass{position:relative;background:var(--glass);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+  border:1px solid var(--line);border-radius:var(--radius);overflow:hidden}
+.glass::before{content:"";position:absolute;inset:0;border-radius:var(--radius);pointer-events:none;
+  background:linear-gradient(135deg,rgba(255,255,255,.05),transparent 45%,rgba(34,211,238,.04))}
+.hero{display:grid;grid-template-columns:1.5fr 1fr;gap:12px;margin-bottom:18px}
+@media(max-width:760px){.hero{grid-template-columns:1fr}}
+.balance-card{padding:18px 20px}
+.balance-card .label{font-size:9px;letter-spacing:2.2px;color:var(--muted);display:flex;align-items:center;gap:6px;margin-bottom:8px}
+.balance-card .label svg{width:12px;height:12px;color:var(--cyan)}
+.balance-amount{font-size:30px;font-weight:900;letter-spacing:-.8px;line-height:1;text-shadow:0 0 22px rgba(30,107,255,.5)}
+.balance-amount .cur{font-size:14px;color:var(--muted);letter-spacing:.5px;margin-right:4px}
+.balance-sub{display:flex;gap:16px;margin-top:12px;flex-wrap:wrap}
+.balance-sub .item{display:flex;align-items:center;gap:6px;font-size:10px;color:var(--muted);letter-spacing:.5px}
+.balance-sub .dot{width:7px;height:7px;border-radius:50%}
+.dot.in{background:var(--green);box-shadow:0 0 8px var(--green)}
+.dot.out{background:var(--red);box-shadow:0 0 8px var(--red)}
+.balance-sub b{color:var(--white);font-size:11px}
+.balance-actions{display:flex;gap:7px;margin-top:14px;flex-wrap:wrap}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.stat{padding:14px;display:flex;flex-direction:column;gap:4px}
+.stat .head{display:flex;align-items:center;justify-content:space-between}
+.stat .ico{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;border:1px solid var(--line)}
+.stat .ico svg{width:14px;height:14px}
+.stat.in .ico{background:rgba(34,197,94,.1);color:var(--green);box-shadow:0 0 12px rgba(34,197,94,.2)}
+.stat.out .ico{background:rgba(239,68,68,.1);color:var(--red);box-shadow:0 0 12px rgba(239,68,68,.2)}
+.stat .val{font-size:15px;font-weight:900;letter-spacing:-.3px;margin-top:4px}
+.stat .cap{font-size:8.5px;letter-spacing:1.4px;color:var(--muted)}
+.tabs{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap}
+.tab{display:flex;align-items:center;gap:6px;padding:8px 13px;border-radius:9px;cursor:pointer;
+  border:1px solid transparent;color:var(--muted);font-size:10.5px;letter-spacing:1.2px;font-weight:800;
+  background:rgba(255,255,255,.02);transition:.22s;font-family:inherit}
+.tab svg{width:13px;height:13px}
+.tab:hover{color:var(--white);background:rgba(30,107,255,.07)}
+.tab.active{color:var(--white);background:rgba(30,107,255,.14);border-color:rgba(59,130,246,.45);
+  box-shadow:0 0 14px rgba(30,107,255,.25)}
+.panel{display:none;animation:fadeUp .4s ease}
+.panel.active{display:block}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.sec-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px;flex-wrap:wrap}
+.sec-head h2{font-size:11px;letter-spacing:2px;display:flex;align-items:center;gap:8px;color:var(--white)}
+.sec-head h2 svg{width:14px;height:14px;color:var(--cyan)}
+.sec-head .count{font-size:9px;color:var(--muted);letter-spacing:1px;background:rgba(30,107,255,.08);
+  border:1px solid var(--line);padding:4px 9px;border-radius:7px}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:11px;padding:16px}
+.form-grid .full{grid-column:1/-1}
+@media(max-width:560px){.form-grid{grid-template-columns:1fr}}
+.field{display:flex;flex-direction:column;gap:5px}
+.field label{font-size:9px;letter-spacing:1.6px;color:var(--muted);display:flex;align-items:center;gap:6px}
+.field label svg{width:11px;height:11px;color:var(--cyan)}
+.field input,.field select,.field textarea{
+  width:100%;background:rgba(2,6,23,.65);border:1px solid var(--line);border-radius:9px;
+  padding:10px 12px;color:var(--white);font-family:inherit;font-weight:700;font-size:12px;
+  outline:none;transition:.2s;letter-spacing:.2px}
+.field textarea{resize:vertical;min-height:56px}
+.field input:focus,.field select:focus,.field textarea:focus{
+  border-color:rgba(59,130,246,.65);box-shadow:0 0 0 3px rgba(30,107,255,.15),0 0 16px rgba(30,107,255,.2)}
+.field select option{background:#0a0f1c;color:#fff}
+.field input[type="date"]{color-scheme:dark}
+.form-actions{grid-column:1/-1;display:flex;gap:7px;justify-content:flex-end;margin-top:2px}
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:11.5px;min-width:680px}
+thead th{text-align:left;padding:11px 14px;font-size:8.5px;letter-spacing:1.8px;color:var(--muted);
+  border-bottom:1px solid var(--line);background:rgba(2,6,23,.4);font-weight:800}
+tbody td{padding:11px 14px;border-bottom:1px solid rgba(59,130,246,.06);vertical-align:middle}
+tbody tr{transition:.18s}
+tbody tr:hover{background:rgba(30,107,255,.06)}
+.type-badge{display:inline-flex;align-items:center;gap:5px;padding:3px 8px;border-radius:6px;
+  font-size:9px;letter-spacing:1px;font-weight:800}
+.type-badge svg{width:10px;height:10px}
+.type-badge.in{background:rgba(34,197,94,.1);color:var(--green);border:1px solid rgba(34,197,94,.25)}
+.type-badge.out{background:rgba(239,68,68,.1);color:var(--red);border:1px solid rgba(239,68,68,.25)}
+.amount-in{color:var(--green);font-weight:900;font-size:11.5px}
+.amount-out{color:var(--red);font-weight:900;font-size:11.5px}
+.note-cell{color:var(--muted);font-weight:700;font-size:10.5px;max-width:200px;line-height:1.5}
+.cat-pill{font-size:9px;letter-spacing:.8px;color:var(--cyan);background:rgba(34,211,238,.07);
+  border:1px solid rgba(34,211,238,.22);padding:3px 7px;border-radius:5px;white-space:nowrap}
+.icon-btn{width:26px;height:26px;border-radius:7px;display:grid;place-items:center;cursor:pointer;
+  border:1px solid rgba(239,68,68,.25);background:rgba(239,68,68,.06);color:var(--red);transition:.2s}
+.icon-btn:hover{background:rgba(239,68,68,.16);box-shadow:0 0 12px rgba(239,68,68,.3)}
+.icon-btn svg{width:12px;height:12px}
+.empty{padding:34px 18px;text-align:center;color:var(--muted);font-size:11px;letter-spacing:1px}
+.empty svg{width:28px;height:28px;color:rgba(59,130,246,.35);margin-bottom:8px}
+.goals-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px}
+.goal-card{padding:14px;display:flex;flex-direction:column;gap:10px;transition:.28s}
+.goal-card:hover{transform:translateY(-3px);border-color:rgba(59,130,246,.4);box-shadow:0 10px 30px rgba(30,107,255,.18)}
+.goal-img{width:100%;height:120px;border-radius:10px;object-fit:cover;border:1px solid var(--line);background:rgba(2,6,23,.5)}
+.goal-img.placeholder{display:grid;place-items:center}
+.goal-img.placeholder svg{width:26px;height:26px;color:rgba(59,130,246,.3)}
+.goal-title{font-size:12px;letter-spacing:.5px;display:flex;align-items:center;gap:6px}
+.goal-title svg{width:13px;height:13px;color:var(--cyan);flex-shrink:0}
+.goal-target{font-size:9px;color:var(--muted);letter-spacing:.8px}
+.progress{height:7px;border-radius:99px;background:rgba(2,6,23,.75);overflow:hidden;border:1px solid var(--line)}
+.progress .bar{height:100%;border-radius:99px;background:linear-gradient(90deg,#1e6bff,#22d3ee);
+  box-shadow:0 0 12px rgba(34,211,238,.5);transition:width .55s cubic-bezier(.22,1,.36,1);width:0}
+.goal-nums{display:flex;justify-content:space-between;font-size:9.5px;letter-spacing:.3px}
+.goal-nums .saved{color:var(--cyan);font-weight:900}
+.goal-nums .pct{color:var(--white);font-weight:900}
+.goal-actions{display:flex;gap:5px}
+.goal-actions .btn{flex:1;padding:6px 8px;font-size:9px}
+.modal-back{position:fixed;inset:0;z-index:100;display:none;place-items:center;padding:18px;
+  background:rgba(2,6,23,.7);backdrop-filter:blur(8px)}
+.modal-back.open{display:grid;animation:fadeIn .2s ease}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.modal{width:100%;max-width:400px;padding:20px;animation:pop .32s cubic-bezier(.22,1,.36,1);max-height:90vh;overflow-y:auto}
+@keyframes pop{from{opacity:0;transform:scale(.94) translateY(8px)}to{opacity:1;transform:none}}
+.modal h3{font-size:12px;letter-spacing:1.4px;margin-bottom:5px;display:flex;align-items:center;gap:7px}
+.modal h3 svg{width:15px;height:15px;color:var(--cyan)}
+.modal p{font-size:10.5px;color:var(--muted);margin-bottom:14px;line-height:1.65;font-weight:700}
+.modal .field{margin-bottom:11px}
+.modal-actions{display:flex;gap:7px;justify-content:flex-end;margin-top:4px;flex-wrap:wrap}
+.modal-icon{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;margin-bottom:12px}
+.modal-icon.warn{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);color:var(--red)}
+.modal-icon.warn svg{width:20px;height:20px}
+.modal-icon.ok{background:rgba(34,211,238,.1);border:1px solid rgba(34,211,238,.3);color:var(--cyan)}
+.modal-icon.ok svg{width:20px;height:20px}
+.dropzone{width:100%;padding:18px;border-radius:11px;border:1.5px dashed rgba(59,130,246,.35);
+  background:rgba(30,107,255,.04);display:flex;flex-direction:column;align-items:center;gap:8px;
+  cursor:pointer;transition:.22s;text-align:center}
+.dropzone:hover{border-color:rgba(59,130,246,.7);background:rgba(30,107,255,.08);
+  box-shadow:0 0 20px rgba(30,107,255,.2)}
+.dropzone svg{width:22px;height:22px;color:var(--cyan)}
+.dropzone b{font-size:10px;letter-spacing:1.2px;color:var(--white)}
+.dropzone span{font-size:8.5px;letter-spacing:.6px;color:var(--muted);font-weight:700}
+.dropzone input{display:none}
+.divider-or{display:flex;align-items:center;gap:10px;margin:12px 0;color:var(--muted);font-size:8.5px;letter-spacing:2px}
+.divider-or::before,.divider-or::after{content:"";flex:1;height:1px;background:var(--line)}
+.preview-box{width:100%;height:100px;border-radius:9px;border:1px solid var(--line);background:rgba(2,6,23,.5);
+  display:grid;place-items:center;overflow:hidden;margin-bottom:4px;color:var(--muted);font-size:9px;letter-spacing:1px}
+.preview-box img{width:100%;height:100%;object-fit:cover}
+.preview-box svg{width:26px;height:26px;color:rgba(59,130,246,.3)}
+.tab-mini{display:flex;gap:5px;margin-bottom:10px;background:rgba(2,6,23,.5);padding:4px;border-radius:9px;border:1px solid var(--line)}
+.tab-mini button{flex:1;padding:7px 8px;border-radius:6px;background:transparent;border:none;
+  color:var(--muted);font-family:inherit;font-weight:800;font-size:9.5px;letter-spacing:1px;
+  cursor:pointer;transition:.2s;display:flex;align-items:center;justify-content:center;gap:5px}
+.tab-mini button svg{width:12px;height:12px}
+.tab-mini button.active{background:rgba(30,107,255,.2);color:#fff;box-shadow:0 0 12px rgba(30,107,255,.3)}
+.tab-mini button.active svg{color:var(--cyan)}
+.toast-wrap{position:fixed;bottom:20px;right:20px;z-index:200;display:flex;flex-direction:column;gap:8px}
+.toast{display:flex;align-items:center;gap:9px;padding:11px 15px;border-radius:10px;
+  background:rgba(9,14,26,.94);border:1px solid var(--line);backdrop-filter:blur(12px);
+  font-size:10.5px;letter-spacing:.4px;box-shadow:0 0 20px rgba(30,107,255,.28);
+  animation:toastIn .32s cubic-bezier(.22,1,.36,1);max-width:300px}
+.toast svg{width:14px;height:14px;color:var(--green);flex-shrink:0}
+@keyframes toastIn{from{opacity:0;transform:translateX(30px)}to{opacity:1;transform:none}}
+.glitch{position:relative;display:inline-block}
+.glitch::before,.glitch::after{content:attr(data-text);position:absolute;left:0;top:0;width:100%;overflow:hidden;pointer-events:none}
+.glitch::before{color:#22d3ee;z-index:-1;animation:glitch1 3.4s infinite linear alternate-reverse;clip-path:inset(0 0 55% 0)}
+.glitch::after{color:#1e6bff;z-index:-2;animation:glitch2 2.8s infinite linear alternate-reverse;clip-path:inset(50% 0 0 0)}
+@keyframes glitch1{0%,93%,100%{transform:translate(0)}94%{transform:translate(-1.5px,1px)}96%{transform:translate(1.5px,-1px)}}
+@keyframes glitch2{0%,91%,100%{transform:translate(0)}92%{transform:translate(1.5px,-1px)}95%{transform:translate(-1.5px,1px)}}
+::-webkit-scrollbar{width:8px;height:8px}
+::-webkit-scrollbar-track{background:var(--bg-0)}
+::-webkit-scrollbar-thumb{background:rgba(30,107,255,.3);border-radius:99px;border:2px solid var(--bg-0)}
+::-webkit-scrollbar-thumb:hover{background:rgba(30,107,255,.55)}
+.fade-in{animation:fadeUp .45s ease both}
+.delay-1{animation-delay:.05s}.delay-2{animation-delay:.1s}
+</style>
+</head>
+<body>
+<div class="bg-fx"><div class="orb a"></div><div class="orb b"></div></div>
+<div class="particles" id="particles"></div>
+<div class="grid-overlay"></div>
+
+<div class="shell">
+  <header class="topbar fade-in">
+    <div class="brand">
+      <div class="logo" id="brandLogo"><i data-lucide="hexagon"></i></div>
+      <div>
+        <h1 class="glitch" data-text="HAM FINANCE">HAM <span>FINANCE</span></h1>
+        <p>PERSONAL WEALTH CONTROL</p>
+      </div>
+    </div>
+    <div class="top-actions">
+      <button class="hamburger" id="hamburger" aria-label="Menu">
+        <div class="lines"><span></span><span></span><span></span></div>
+      </button>
+    </div>
+  </header>
+
+  <div class="banner decorative" id="banner">
+    <div id="bannerSlides"></div>
+    <button class="banner-nav prev" id="navPrev" aria-label="Sebelumnya"><i data-lucide="chevron-left"></i></button>
+    <button class="banner-nav next" id="navNext" aria-label="Berikutnya"><i data-lucide="chevron-right"></i></button>
+    <div class="dots" id="bannerDots"></div>
+  </div>
+
+  <section class="hero fade-in delay-2">
+    <div class="glass balance-card">
+      <div class="label"><i data-lucide="wallet"></i> SALDO SAAT INI</div>
+      <div class="balance-amount"><span class="cur">Rp</span><span id="balanceDisplay">0</span></div>
+      <div class="balance-sub">
+        <div class="item"><span class="dot in"></span> MASUK <b id="totalInDisplay">Rp 0</b></div>
+        <div class="item"><span class="dot out"></span> KELUAR <b id="totalOutDisplay">Rp 0</b></div>
+      </div>
+      <div class="balance-actions">
+        <button class="btn primary small" id="addIncomeBtn"><i data-lucide="arrow-down-left"></i> MASUK</button>
+        <button class="btn danger small" id="addExpenseBtn"><i data-lucide="arrow-up-right"></i> KELUAR</button>
+      </div>
+    </div>
+    <div class="stats">
+      <div class="glass stat in">
+        <div class="head"><span class="cap">MASUK BLN INI</span><span class="ico"><i data-lucide="trending-up"></i></span></div>
+        <div class="val" id="monthInDisplay">Rp 0</div>
+        <div class="cap" id="monthInCount">0 TRANSAKSI</div>
+      </div>
+      <div class="glass stat out">
+        <div class="head"><span class="cap">KELUAR BLN INI</span><span class="ico"><i data-lucide="trending-down"></i></span></div>
+        <div class="val" id="monthOutDisplay">Rp 0</div>
+        <div class="cap" id="monthOutCount">0 TRANSAKSI</div>
+      </div>
+    </div>
+  </section>
+
+  <nav class="tabs fade-in delay-2">
+    <button class="tab active" data-tab="mutasi"><i data-lucide="list"></i> MUTASI</button>
+    <button class="tab" data-tab="transaksi"><i data-lucide="plus-circle"></i> INPUT</button>
+    <button class="tab" data-tab="nabung"><i data-lucide="piggy-bank"></i> NABUNG</button>
+  </nav>
+
+  <section class="panel active" id="panel-mutasi">
+    <div class="sec-head">
+      <h2><i data-lucide="list"></i> MUTASI TRANSAKSI</h2>
+      <span class="count" id="mutasiCount">0 DATA</span>
+    </div>
+    <div class="glass">
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>TANGGAL</th><th>TIPE</th><th>JUMLAH</th><th>KETERANGAN</th><th>KATEGORI</th><th></th></tr></thead>
+          <tbody id="mutasiBody"></tbody>
+        </table>
+      </div>
+      <div id="mutasiEmpty" class="empty" style="display:none">
+        <i data-lucide="inbox"></i>
+        <div>BELUM ADA TRANSAKSI</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel" id="panel-transaksi">
+    <div class="sec-head"><h2><i data-lucide="plus-circle"></i> INPUT TRANSAKSI MANUAL</h2></div>
+    <div class="glass">
+      <form class="form-grid" id="txForm">
+        <div class="field">
+          <label><i data-lucide="repeat"></i> TIPE</label>
+          <select id="txType">
+            <option value="in">UANG MASUK</option>
+            <option value="out">UANG KELUAR</option>
+          </select>
+        </div>
+        <div class="field">
+          <label><i data-lucide="calendar"></i> TANGGAL</label>
+          <input type="date" id="txDate" required>
+        </div>
+        <div class="field">
+          <label><i data-lucide="banknote"></i> JUMLAH (Rp)</label>
+          <input type="number" id="txAmount" min="1" placeholder="0" required>
+        </div>
+        <div class="field">
+          <label><i data-lucide="tag"></i> KATEGORI</label>
+          <input type="text" id="txCategory" placeholder="Gaji, Makan, Transport" required>
+        </div>
+        <div class="field full">
+          <label><i data-lucide="file-text"></i> KETERANGAN — UNTUK APA / DARI MANA</label>
+          <textarea id="txNote" placeholder="Contoh: Gaji bulanan, atau Beli makan siang" required></textarea>
+        </div>
+        <div class="form-actions">
+          <button type="button" class="btn ghost small" id="txCancel"><i data-lucide="x"></i> BATAL</button>
+          <button type="submit" class="btn primary small"><i data-lucide="check"></i> SIMPAN</button>
+        </div>
+      </form>
+    </div>
+  </section>
+
+  <section class="panel" id="panel-nabung">
+    <div class="sec-head">
+      <h2><i data-lucide="piggy-bank"></i> TABUNGAN & TUJUAN</h2>
+      <button class="btn primary small" id="addGoalBtn"><i data-lucide="plus"></i> TUJUAN BARU</button>
+    </div>
+    <div class="goals-grid" id="goalsGrid"></div>
+    <div id="goalsEmpty" class="glass empty" style="display:none">
+      <i data-lucide="target"></i>
+      <div>BELUM ADA TUJUAN TABUNGAN</div>
+    </div>
+  </section>
+</div>
+
+<div class="sidebar-back" id="sidebarBack"></div>
+<aside class="sidebar" id="sidebar">
+  <div class="sb-head"><i data-lucide="settings-2"></i><b>MENU & PENGATURAN</b></div>
+  <div class="sb-label">TAMPILAN</div>
+  <button class="sb-item" id="sbLogo"><i data-lucide="image"></i> GANTI LOGO</button>
+  <button class="sb-item" id="sbBanner"><i data-lucide="panel-top"></i> GANTI BANNER</button>
+  <div class="sb-divider"></div>
+  <div class="sb-label">KEUANGAN</div>
+  <button class="sb-item" id="sbSetBalance"><i data-lucide="sliders-horizontal"></i> SET SALDO AWAL</button>
+  <div class="sb-divider"></div>
+  <div class="sb-label">DATA</div>
+  <button class="sb-item" id="sbExport"><i data-lucide="download"></i> EXPORT DATA (JSON)</button>
+  <button class="sb-item" id="sbImport"><i data-lucide="upload"></i> IMPORT DATA</button>
+  <button class="sb-item danger" id="sbReset"><i data-lucide="trash-2"></i> RESET SEMUA DATA</button>
+  <div class="sb-note">
+    <p>Semua data tersimpan otomatis di perangkat Anda (<b>localStorage</b>). Refresh tidak akan menghapus data.</p>
+  </div>
+</aside>
+
+<div class="modal-back" id="modalBack">
+  <div class="glass modal" id="modalContent"></div>
+</div>
+
+<div class="toast-wrap" id="toastWrap"></div>
+
+<script>
+/* ============ STATE ============ */
+const STORAGE_KEY = 'nexus_finance_v4';
+const defaultState = { startingBalance:0, transactions:[], goals:[], logoUrl:'', banners:['','',''] };
+let state = loadState();
+
+function loadState(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY)
+      || localStorage.getItem('nexus_finance_v3')
+      || localStorage.getItem('nexus_finance_v2')
+      || localStorage.getItem('nexus_finance_v1');
+    if(!raw) return structuredClone(defaultState);
+    const p = JSON.parse(raw);
+    let banners = ['', '', ''];
+    if(Array.isArray(p.banners)){
+      banners = [p.banners[0]||'', p.banners[1]||'', p.banners[2]||''];
+    } else if (typeof p.bannerUrl === 'string' && p.bannerUrl){
+      banners[0] = p.bannerUrl;
+    }
+    return {
+      startingBalance: Number(p.startingBalance) || 0,
+      transactions: Array.isArray(p.transactions) ? p.transactions : [],
+      goals: Array.isArray(p.goals) ? p.goals : [],
+      logoUrl: typeof p.logoUrl === 'string' ? p.logoUrl : '',
+      banners
+    };
+  }catch(e){ return structuredClone(defaultState); }
+}
+function saveState(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+
+/* ============ HELPERS ============ */
+const fmt = n => new Intl.NumberFormat('id-ID').format(Math.round(n));
+const rp = n => 'Rp ' + fmt(n);
+function todayStr(){ return new Date().toISOString().slice(0,10); }
+function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+function monthKey(d){ return d.slice(0,7); }
+function formatDate(d){
+  const [y,m,day] = d.split('-');
+  const months = ['JAN','FEB','MAR','APR','MEI','JUN','JUL','AGS','SEP','OKT','NOV','DES'];
+  return `${day} ${months[parseInt(m)-1]} ${y}`;
+}
+function escapeHtml(s){
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function isValidUrl(str){
+  try{ const u = new URL(str); return u.protocol==='http:'||u.protocol==='https:'; }catch(e){ return false; }
+}
+function isDataUrl(str){ return typeof str==='string' && str.startsWith('data:image/'); }
+function isImageSrc(str){ return isValidUrl(str) || isDataUrl(str); }
+function calcTotals(){
+  const totalIn = state.transactions.filter(t=>t.type==='in').reduce((s,t)=>s+Number(t.amount),0);
+  const totalOut = state.transactions.filter(t=>t.type==='out').reduce((s,t)=>s+Number(t.amount),0);
+  return { totalIn, totalOut, balance: state.startingBalance + totalIn - totalOut };
+}
+function calcMonth(){
+  const mk = monthKey(todayStr());
+  const inM = state.transactions.filter(t=>t.type==='in' && monthKey(t.date)===mk);
+  const outM = state.transactions.filter(t=>t.type==='out' && monthKey(t.date)===mk);
+  return {
+    inSum: inM.reduce((s,t)=>s+Number(t.amount),0), inCount: inM.length,
+    outSum: outM.reduce((s,t)=>s+Number(t.amount),0), outCount: outM.length
+  };
+}
+
+/* ============ PARTICLES ============ */
+function initParticles(){
+  const wrap = document.getElementById('particles');
+  for(let i=0;i<14;i++){
+    const p = document.createElement('div');
+    p.className = 'particle' + (Math.random() > 0.5 ? ' blue' : '');
+    const size = 8 + Math.random() * 22;
+    p.style.width = size + 'px';
+    p.style.height = size + 'px';
+    p.style.left = Math.random() * 100 + '%';
+    p.style.top = Math.random() * 100 + '%';
+    p.style.animationDelay = (-Math.random() * 14) + 's';
+    p.style.animationDuration = (12 + Math.random() * 10) + 's';
+    wrap.appendChild(p);
+  }
+}
+
+/* ============ RENDER ============ */
+function renderAll(){ renderBranding(); renderBalance(); renderMutasi(); renderGoals(); }
+
+function renderBranding(){
+  const logoEl = document.getElementById('brandLogo');
+  if(state.logoUrl && isImageSrc(state.logoUrl)){
+    logoEl.innerHTML = `<img src="${escapeHtml(state.logoUrl)}" alt="logo" onerror="this.parentElement.innerHTML='<i data-lucide=\\'hexagon\\'></i>';lucide.createIcons()">`;
+  } else {
+    logoEl.innerHTML = `<i data-lucide="hexagon"></i>`;
+  }
+  renderBanner();
+  lucide.createIcons();
+}
+
+/* ============ BANNER CAROUSEL (timer single-source) ============ */
+let bannerTimer = null;
+let bannerIndex = 0;
+let swipeBound = false;
+
+function stopBannerTimer(){
+  if(bannerTimer){ clearInterval(bannerTimer); bannerTimer = null; }
+}
+
+function startBannerTimer(){
+  stopBannerTimer(); /* SELALU clear dulu — ini kunci perbaikan */
+  const total = document.querySelectorAll('#bannerSlides .slide').length;
+  if(total < 2) return;            /* tidak perlu timer kalau < 2 slide */
+  if(document.hidden) return;      /* tab tidak aktif, skip */
+  bannerTimer = setInterval(()=>{
+    const t = document.querySelectorAll('#bannerSlides .slide').length;
+    if(t > 1) goToSlide((bannerIndex + 1) % t);
+  }, 4200);
+}
+
+function renderBanner(){
+  const slidesWrap = document.getElementById('bannerSlides');
+  const dotsWrap = document.getElementById('bannerDots');
+  const banner = document.getElementById('banner');
+
+  /* Ambil semua banner yang valid, TANPA mengubah urutan.
+     Kita pakai index asli supaya 3 slot terisi = 3 slide. */
+  const validBanners = [];
+  state.banners.forEach((b,i)=>{
+    if(b && isImageSrc(b)) validBanners.push({url:b, slot:i});
+  });
+
+  if(validBanners.length === 0){
+    slidesWrap.innerHTML = '';
+    dotsWrap.innerHTML = '';
+    banner.classList.add('decorative');
+    stopBannerTimer();
+    return;
+  }
+  banner.classList.remove('decorative');
+
+  slidesWrap.innerHTML = validBanners.map((b,i)=>`
+    <div class="slide ${i===0?'active':''}" data-i="${i}">
+      <img src="${escapeHtml(b.url)}" alt="" draggable="false" onerror="this.closest('.slide').style.display='none'">
+    </div>`).join('');
+  dotsWrap.innerHTML = validBanners.map((_,i)=>`<button class="dot-btn ${i===0?'active':''}" data-i="${i}" aria-label="slide ${i+1}"></button>`).join('');
+
+  bannerIndex = 0;
+
+  dotsWrap.querySelectorAll('.dot-btn').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      stopBannerTimer();               /* pause saat klik dot */
+      goToSlide(parseInt(btn.dataset.i));
+      startBannerTimer();              /* restart */
+    });
+  });
+
+  if(!swipeBound){ bindSwipe(); swipeBound = true; }
+
+  startBannerTimer();
+}
+
+function goToSlide(i){
+  const slides = document.querySelectorAll('#bannerSlides .slide');
+  const dots = document.querySelectorAll('#bannerDots .dot-btn');
+  if(slides.length === 0) return;
+  const total = slides.length;
+  i = ((i % total) + total) % total;
+  bannerIndex = i;
+  slides.forEach((s,idx)=>{
+    s.classList.toggle('active', idx===i);
+    s.style.transform = '';
+  });
+  dots.forEach((d,idx)=>d.classList.toggle('active', idx===i));
+}
+
+/* Swipe / Drag — di-bind SEKALI saja */
+function bindSwipe(){
+  const banner = document.getElementById('banner');
+  const slidesWrap = document.getElementById('bannerSlides');
+
+  let startX = 0, startY = 0;
+  let dragging = false;
+  let lockedDir = null;
+  const THRESHOLD = 55;
+
+  function onDown(x, y){
+    if(document.querySelectorAll('#bannerSlides .slide').length < 1) return;
+    startX = x; startY = y;
+    dragging = true; lockedDir = null;
+    stopBannerTimer();
+    banner.classList.add('dragging');
+  }
+  function onMove(x, y, preventDefaultFn){
+    if(!dragging) return;
+    const dx = x - startX;
+    const dy = y - startY;
+    if(!lockedDir){
+      if(Math.abs(dx) > 6 || Math.abs(dy) > 6){
+        lockedDir = Math.abs(dx) > Math.abs(dy) ? 'x' : 'y';
+      }
+    }
+    if(lockedDir === 'y') return;
+    if(preventDefaultFn) preventDefaultFn();
+    const slides = document.querySelectorAll('#bannerSlides .slide');
+    if(slides.length <= 1) return;
+    const current = slides[bannerIndex];
+    if(current){
+      const damp = Math.max(-160, Math.min(160, dx));
+      current.style.transform = `translateX(${damp}px)`;
+    }
+  }
+  function onUp(x){
+    if(!dragging) return;
+    dragging = false;
+    banner.classList.remove('dragging');
+    const dx = x - startX;
+    const slides = document.querySelectorAll('#bannerSlides .slide');
+    const total = slides.length;
+    const current = slides[bannerIndex];
+
+    if(lockedDir === 'x' && total > 1){
+      if(dx <= -THRESHOLD){
+        if(current) current.style.transform = '';
+        goToSlide(bannerIndex + 1);
+      } else if(dx >= THRESHOLD){
+        if(current) current.style.transform = '';
+        goToSlide(bannerIndex - 1);
+      } else {
+        if(current) current.style.transform = '';
+      }
+    } else {
+      if(current) current.style.transform = '';
+    }
+    lockedDir = null;
+    startBannerTimer();   /* restart timer — bukan resumeAuto terpisah */
+  }
+
+  /* Mouse */
+  banner.addEventListener('mousedown', e=>{
+    if(e.button !== 0) return;
+    if(e.target.closest('.banner-nav') || e.target.closest('.dots')) return;
+    e.preventDefault();
+    onDown(e.clientX, e.clientY);
+  });
+  window.addEventListener('mousemove', e=>{
+    if(!dragging) return;
+    onMove(e.clientX, e.clientY, ()=>e.preventDefault());
+  });
+  window.addEventListener('mouseup', e=>{
+    if(!dragging) return;
+    onUp(e.clientX);
+  });
+  slidesWrap.addEventListener('dragstart', e=>e.preventDefault());
+
+  /* Touch */
+  banner.addEventListener('touchstart', e=>{
+    if(e.target.closest('.banner-nav') || e.target.closest('.dots')) return;
+    const t = e.touches[0];
+    onDown(t.clientX, t.clientY);
+  }, { passive:true });
+
+  banner.addEventListener('touchmove', e=>{
+    if(!dragging) return;
+    const t = e.touches[0];
+    onMove(t.clientX, t.clientY, ()=> { if(e.cancelable) e.preventDefault(); });
+  }, { passive:false });
+
+  banner.addEventListener('touchend', e=>{
+    if(!dragging) return;
+    const t = e.changedTouches[0];
+    onUp(t.clientX);
+  });
+
+  banner.addEventListener('touchcancel', ()=>{
+    if(!dragging) return;
+    dragging = false;
+    banner.classList.remove('dragging');
+    const slides = document.querySelectorAll('#bannerSlides .slide');
+    const current = slides[bannerIndex];
+    if(current) current.style.transform = '';
+    lockedDir = null;
+    startBannerTimer();
+  });
+
+  /* Panah navigasi */
+  document.getElementById('navPrev').addEventListener('click', e=>{
+    e.stopPropagation();
+    stopBannerTimer();
+    goToSlide(bannerIndex - 1);
+    startBannerTimer();
+  });
+  document.getElementById('navNext').addEventListener('click', e=>{
+    e.stopPropagation();
+    stopBannerTimer();
+    goToSlide(bannerIndex + 1);
+    startBannerTimer();
+  });
+}
+
+function renderBalance(){
+  const { totalIn, totalOut, balance } = calcTotals();
+  document.getElementById('balanceDisplay').textContent = fmt(balance);
+  document.getElementById('totalInDisplay').textContent = rp(totalIn);
+  document.getElementById('totalOutDisplay').textContent = rp(totalOut);
+  const m = calcMonth();
+  document.getElementById('monthInDisplay').textContent = rp(m.inSum);
+  document.getElementById('monthInCount').textContent = m.inCount + ' TRANSAKSI';
+  document.getElementById('monthOutDisplay').textContent = rp(m.outSum);
+  document.getElementById('monthOutCount').textContent = m.outCount + ' TRANSAKSI';
+}
+
+function renderMutasi(){
+  const body = document.getElementById('mutasiBody');
+  const empty = document.getElementById('mutasiEmpty');
+  const list = [...state.transactions].sort((a,b)=> b.date.localeCompare(a.date) || b.createdAt - a.createdAt);
+  document.getElementById('mutasiCount').textContent = list.length + ' DATA';
+  if(list.length === 0){ body.innerHTML=''; empty.style.display='block'; lucide.createIcons(); return; }
+  empty.style.display='none';
+  body.innerHTML = list.map(t=>{
+    const isIn = t.type === 'in';
+    return `<tr>
+      <td style="white-space:nowrap;font-size:10.5px;color:var(--muted)">${formatDate(t.date)}</td>
+      <td><span class="type-badge ${isIn?'in':'out'}"><i data-lucide="${isIn?'arrow-down-left':'arrow-up-right'}"></i>${isIn?'MASUK':'KELUAR'}</span></td>
+      <td class="${isIn?'amount-in':'amount-out'}" style="white-space:nowrap">${isIn?'+':'-'} ${rp(t.amount)}</td>
+      <td class="note-cell">${escapeHtml(t.note)}</td>
+      <td><span class="cat-pill">${escapeHtml(t.category)}</span></td>
+      <td style="text-align:right"><button class="icon-btn" onclick="confirmDeleteTx('${t.id}')"><i data-lucide="trash-2"></i></button></td>
+    </tr>`;
+  }).join('');
+  lucide.createIcons();
+}
+
+function renderGoals(){
+  const grid = document.getElementById('goalsGrid');
+  const empty = document.getElementById('goalsEmpty');
+  if(state.goals.length === 0){ grid.innerHTML=''; empty.style.display='block'; lucide.createIcons(); return; }
+  empty.style.display='none';
+  grid.innerHTML = state.goals.map(g=>{
+    const pct = g.target > 0 ? Math.min(100, Math.round(g.saved / g.target * 100)) : 0;
+    const imgHtml = g.photo
+      ? `<img class="goal-img" src="${g.photo}" alt="">`
+      : `<div class="goal-img placeholder"><i data-lucide="image"></i></div>`;
+    return `<div class="glass goal-card">
+      ${imgHtml}
+      <div class="goal-title"><i data-lucide="target"></i> ${escapeHtml(g.name)}</div>
+      <div class="goal-target">TARGET ${rp(g.target)}</div>
+      <div class="progress"><div class="bar" style="width:${pct}%"></div></div>
+      <div class="goal-nums"><span class="saved">${rp(g.saved)}</span><span class="pct">${pct}%</span></div>
+      <div class="goal-actions">
+        <button class="btn ghost" onclick="openAddToGoal('${g.id}')"><i data-lucide="plus"></i> NABUNG</button>
+        <button class="btn ghost" onclick="editGoalPhoto('${g.id}')"><i data-lucide="image"></i> FOTO</button>
+        <button class="btn danger" onclick="confirmDeleteGoal('${g.id}')"><i data-lucide="trash-2"></i></button>
+      </div>
+    </div>`;
+  }).join('');
+  lucide.createIcons();
+}
+
+/* ============ TOAST ============ */
+function toast(msg){
+  const wrap = document.getElementById('toastWrap');
+  const el = document.createElement('div');
+  el.className = 'toast';
+  el.innerHTML = `<i data-lucide="check-circle-2"></i><span>${escapeHtml(msg)}</span>`;
+  wrap.appendChild(el);
+  lucide.createIcons();
+  setTimeout(()=>{ el.style.opacity='0'; el.style.transform='translateX(30px)'; el.style.transition='.3s'; setTimeout(()=>el.remove(),300); }, 2500);
+}
+
+/* ============ MODAL ============ */
+const modalBack = document.getElementById('modalBack');
+const modalContent = document.getElementById('modalContent');
+
+function closeModal(){
+  modalBack.classList.remove('open');
+  setTimeout(()=>{ if(!modalBack.classList.contains('open')) modalContent.innerHTML=''; }, 200);
+}
+function openModal(html){
+  modalContent.innerHTML = html;
+  modalBack.classList.add('open');
+  lucide.createIcons();
+}
+modalBack.addEventListener('click', e=>{ if(e.target === modalBack) closeModal(); });
+document.addEventListener('keydown', e=>{ if(e.key==='Escape' && modalBack.classList.contains('open')) closeModal(); });
+
+function confirmDialog({icon='warn', iconName='alert-triangle', title, message, confirmText='HAPUS', confirmClass='danger', onConfirm}){
+  openModal(`
+    <div class="modal-icon ${icon}"><i data-lucide="${iconName}"></i></div>
+    <h3>${escapeHtml(title)}</h3>
+    <p>${message}</p>
+    <div class="modal-actions">
+      <button class="btn ghost small" data-act="cancel"><i data-lucide="x"></i> BATAL</button>
+      <button class="btn ${confirmClass} small" data-act="ok"><i data-lucide="check"></i> ${escapeHtml(confirmText)}</button>
+    </div>`);
+  modalContent.querySelector('[data-act="cancel"]').onclick = closeModal;
+  modalContent.querySelector('[data-act="ok"]').onclick = ()=>{ closeModal(); onConfirm(); };
+}
+
+function promptDialog({title, message, label, placeholder='', defaultValue='', type='text', confirmText='SIMPAN', onConfirm}){
+  openModal(`
+    <div class="modal-icon ok"><i data-lucide="edit-3"></i></div>
+    <h3>${escapeHtml(title)}</h3>
+    <p>${message}</p>
+    <div class="field">
+      <label><i data-lucide="type"></i> ${escapeHtml(label)}</label>
+      <input type="${type}" id="promptInput" placeholder="${escapeHtml(placeholder)}" value="${escapeHtml(String(defaultValue))}">
+    </div>
+    <div class="modal-actions">
+      <button class="btn ghost small" data-act="cancel"><i data-lucide="x"></i> BATAL</button>
+      <button class="btn primary small" data-act="ok"><i data-lucide="check"></i> ${escapeHtml(confirmText)}</button>
+    </div>`);
+  const input = document.getElementById('promptInput');
+  setTimeout(()=>{ input.focus(); input.select(); }, 100);
+  input.addEventListener('keydown', e=>{ if(e.key==='Enter') modalContent.querySelector('[data-act="ok"]').click(); });
+  modalContent.querySelector('[data-act="cancel"]').onclick = closeModal;
+  modalContent.querySelector('[data-act="ok"]').onclick = ()=>{ const val = input.value.trim(); closeModal(); onConfirm(val); };
+}
+
+function openImagePicker({ title, description, currentValue, onSave }){
+  const id = 'f_' + Math.random().toString(36).slice(2,8);
+  openModal(`
+    <div class="modal-icon ok"><i data-lucide="image"></i></div>
+    <h3>${escapeHtml(title)}</h3>
+    <p>${escapeHtml(description)}</p>
+    <div class="tab-mini" role="tablist">
+      <button type="button" data-mode="upload" class="active"><i data-lucide="upload"></i> UPLOAD</button>
+      <button type="button" data-mode="link"><i data-lucide="link"></i> LINK</button>
+    </div>
+    <div class="preview-box" id="previewBox_${id}">
+      ${currentValue && isImageSrc(currentValue) ? `<img src="${escapeHtml(currentValue)}" alt="preview">` : `<i data-lucide="image"></i>`}
+    </div>
+    <div data-mode-panel="upload">
+      <label class="dropzone" for="${id}">
+        <i data-lucide="cloud-upload"></i>
+        <b>KLIK UNTUK PILIH FILE</b>
+        <span>JPG, PNG, WEBP · MAKS 2.5MB</span>
+        <input type="file" id="${id}" accept="image/*">
+      </label>
+    </div>
+    <div data-mode-panel="link" style="display:none">
+      <div class="divider-or">ATAU PAKAI LINK</div>
+      <div class="field" style="margin-bottom:0">
+        <label><i data-lucide="link"></i> URL FOTO</label>
+        <input type="url" id="linkInput_${id}" placeholder="https://..." value="${currentValue && isValidUrl(currentValue) ? escapeHtml(currentValue) : ''}">
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn ghost small" data-act="remove"><i data-lucide="trash-2"></i> HAPUS</button>
+      <button class="btn ghost small" data-act="cancel"><i data-lucide="x"></i> BATAL</button>
+      <button class="btn primary small" data-act="save"><i data-lucide="check"></i> SIMPAN</button>
+    </div>`);
+
+  const previewBox = document.getElementById('previewBox_' + id);
+  const linkInput  = document.getElementById('linkInput_' + id);
+  const fileInput  = document.getElementById(id);
+  const tabBtns    = modalContent.querySelectorAll('.tab-mini button');
+  const panels     = modalContent.querySelectorAll('[data-mode-panel]');
+
+  let pickedValue = currentValue || '';
+  let mode = 'upload';
+
+  function setMode(m){
+    mode = m;
+    tabBtns.forEach(b=>b.classList.toggle('active', b.dataset.mode===m));
+    panels.forEach(p=>p.style.display = (p.dataset.modePanel===m) ? '' : 'none');
+  }
+  tabBtns.forEach(b=>b.addEventListener('click', ()=>setMode(b.dataset.mode)));
+
+  fileInput.addEventListener('change', e=>{
+    const f = e.target.files[0]; if(!f) return;
+    if(f.size > 2.5*1024*1024){ toast('Maksimal 2.5MB'); e.target.value=''; return; }
+    const reader = new FileReader();
+    reader.onload = ev=>{ pickedValue = ev.target.result; previewBox.innerHTML = `<img src="${pickedValue}" alt="preview">`; };
+    reader.onerror = ()=> toast('Gagal membaca file');
+    reader.readAsDataURL(f);
+  });
+
+  linkInput.addEventListener('input', ()=>{
+    const v = linkInput.value.trim();
+    pickedValue = v;
+    if(v && isValidUrl(v)){
+      previewBox.innerHTML = `<img src="${escapeHtml(v)}" alt="preview" onerror="this.parentElement.innerHTML='<span style=&quot;font-size:9px;color:#ef4444&quot;>Gambar gagal dimuat</span>'">`;
+    } else if(!v){
+      previewBox.innerHTML = `<i data-lucide="image"></i>`;
+      lucide.createIcons();
+    } else {
+      previewBox.innerHTML = `<span style="font-size:9px;color:var(--muted)">Link belum valid</span>`;
+    }
+  });
+
+  modalContent.querySelector('[data-act="cancel"]').onclick = closeModal;
+  modalContent.querySelector('[data-act="remove"]').onclick = ()=>{
+    closeModal(); setTimeout(()=>{ onSave(''); toast('Foto dihapus'); }, 220);
+  };
+  modalContent.querySelector('[data-act="save"]').onclick = ()=>{
+    let val = '';
+    if(mode === 'link'){
+      const v = linkInput.value.trim();
+      if(v && !isValidUrl(v)){ toast('Link tidak valid'); return; }
+      if(v && !isImageSrc(v)){ toast('Link bukan gambar'); return; }
+      val = v;
+    } else {
+      val = pickedValue || '';
+    }
+    closeModal(); setTimeout(()=>{ onSave(val); toast('Berhasil disimpan'); }, 220);
+  };
+}
+
+function openLogoModal(){
+  openImagePicker({
+    title:'GANTI LOGO',
+    description:'Upload foto logo atau tempel link gambar online. Rasio disarankan 1:1 (kotak).',
+    currentValue: state.logoUrl,
+    onSave:(val)=>{ state.logoUrl = val; saveState(); renderBranding(); }
+  });
+}
+
+function openBannerModal(){
+  const slotCards = state.banners.map((b,i)=>{
+    const preview = b && isImageSrc(b)
+      ? `<img src="${escapeHtml(b)}" alt="">`
+      : `<i data-lucide="image"></i>`;
+    return `<div class="field" style="margin-bottom:8px">
+      <label><i data-lucide="panel-top"></i> FOTO ${i+1} ${b ? '<span style="color:var(--cyan)">· TERISI</span>' : ''}</label>
+      <div style="display:flex;gap:7px;align-items:center">
+        <div class="preview-box" style="height:52px;width:90px;margin-bottom:0;flex-shrink:0">${preview}</div>
+        <button class="btn ghost small" data-edit="${i}" style="flex:1"><i data-lucide="upload"></i> PILIH</button>
+        <button class="btn danger small" data-clear="${i}"><i data-lucide="x"></i></button>
+      </div>
+    </div>`;
+  }).join('');
+
+  openModal(`
+    <div class="modal-icon ok"><i data-lucide="panel-top"></i></div>
+    <h3>GANTI BANNER</h3>
+    <p>Banner menampilkan hingga <b style="color:#fff">3 foto</b> yang bergeser otomatis dan bisa <b style="color:#fff">digeser manual</b>. Isi slot mana saja.</p>
+    ${slotCards}
+    <div class="modal-actions">
+      <button class="btn ghost small" data-act="close"><i data-lucide="x"></i> TUTUP</button>
+    </div>`);
+
+  modalContent.querySelector('[data-act="close"]').onclick = closeModal;
+
+  modalContent.querySelectorAll('[data-edit]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const i = parseInt(btn.dataset.edit);
+      const slot = state.banners[i] || '';
+      openImagePicker({
+        title:`BANNER FOTO ${i+1}`,
+        description:'Upload foto atau tempel link. Rasio disarankan lebar (1200×180).',
+        currentValue: slot,
+        onSave:(val)=>{
+          state.banners[i] = val;
+          saveState();
+          renderBanner();
+          setTimeout(()=>openBannerModal(), 50);
+        }
+      });
+    });
+  });
+  modalContent.querySelectorAll('[data-clear]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const i = parseInt(btn.dataset.clear);
+      state.banners[i] = '';
+      saveState();
+      renderBanner();
+      openBannerModal();
+      toast('Slot dihapus');
+    });
+  });
+}
+
+/* ============ TRANSACTIONS ============ */
+function addTx(e){
+  e.preventDefault();
+  const type = document.getElementById('txType').value;
+  const date = document.getElementById('txDate').value;
+  const amount = Number(document.getElementById('txAmount').value);
+  const category = document.getElementById('txCategory').value.trim();
+  const note = document.getElementById('txNote').value.trim();
+  if(!date || !amount || amount <= 0 || !category || !note){ toast('Lengkapi semua data'); return; }
+  state.transactions.push({ id:uid(), type, date, amount, category, note, createdAt:Date.now() });
+  saveState();
+  document.getElementById('txForm').reset();
+  document.getElementById('txDate').value = todayStr();
+  renderAll();
+  toast(type==='in' ? 'Uang masuk dicatat' : 'Pengeluaran dicatat');
+}
+
+function confirmDeleteTx(id){
+  const t = state.transactions.find(x=>x.id===id);
+  if(!t) return;
+  confirmDialog({
+    iconName:'trash-2', title:'HAPUS TRANSAKSI?',
+    message:`Transaksi <b style="color:#fff">${escapeHtml(t.note)}</b> sebesar <b style="color:#fff">${rp(t.amount)}</b> akan dihapus permanen.`,
+    onConfirm:()=>{
+      state.transactions = state.transactions.filter(x=>x.id!==id);
+      saveState(); renderAll(); toast('Transaksi dihapus');
+    }
+  });
+}
+window.confirmDeleteTx = confirmDeleteTx;
+
+function confirmDeleteGoal(id){
+  const g = state.goals.find(x=>x.id===id);
+  if(!g) return;
+  confirmDialog({
+    iconName:'trash-2', title:'HAPUS TUJUAN?',
+    message:`Tujuan <b style="color:#fff">${escapeHtml(g.name)}</b> akan dihapus permanen.`,
+    onConfirm:()=>{
+      state.goals = state.goals.filter(x=>x.id!==id);
+      saveState(); renderGoals(); toast('Tujuan dihapus');
+    }
+  });
+}
+window.confirmDeleteGoal = confirmDeleteGoal;
+
+function openAddToGoal(id){
+  const g = state.goals.find(x=>x.id===id);
+  if(!g) return;
+  promptDialog({
+    title:'TAMBAH TABUNGAN', label:'JUMLAH (Rp)', type:'number', placeholder:'0',
+    message:`Tujuan: <b style="color:#fff">${escapeHtml(g.name)}</b><br>Terumpul: ${rp(g.saved)} / Target: ${rp(g.target)}`,
+    confirmText:'TABUNG',
+    onConfirm:(val)=>{
+      const n = Number(val);
+      if(!n || n <= 0){ toast('Jumlah tidak valid'); return; }
+      g.saved += n; saveState(); renderGoals(); toast('Ditambahkan: ' + rp(n));
+    }
+  });
+}
+window.openAddToGoal = openAddToGoal;
+
+function editGoalPhoto(id){
+  const g = state.goals.find(x=>x.id===id);
+  if(!g) return;
+  openImagePicker({
+    title:'FOTO TUJUAN', description:'Upload foto barang atau tempel link gambar online.',
+    currentValue: g.photo || '',
+    onSave:(val)=>{ g.photo = val || null; saveState(); renderGoals(); }
+  });
+}
+window.editGoalPhoto = editGoalPhoto;
+
+function openSetBalance(){
+  openModal(`
+    <div class="modal-icon ok"><i data-lucide="sliders-horizontal"></i></div>
+    <h3>SET SALDO AWAL</h3>
+    <p>Masukkan dana yang Anda miliki saat ini. Nilai ini menjadi dasar perhitungan saldo.</p>
+    <div class="field">
+      <label><i data-lucide="banknote"></i> SALDO AWAL (Rp)</label>
+      <input type="number" id="modalBalance" value="${state.startingBalance}" placeholder="0">
+    </div>
+    <div class="modal-actions">
+      <button class="btn ghost small" data-act="cancel"><i data-lucide="x"></i> BATAL</button>
+      <button class="btn primary small" data-act="ok"><i data-lucide="check"></i> SIMPAN</button>
+    </div>`);
+  const input = document.getElementById('modalBalance');
+  setTimeout(()=>input?.focus(), 100);
+  modalContent.querySelector('[data-act="cancel"]').onclick = closeModal;
+  modalContent.querySelector('[data-act="ok"]').onclick = ()=>{
+    const val = Number(input.value);
+    if(isNaN(val) || val < 0){ toast('Saldo tidak valid'); return; }
+    state.startingBalance = val;
+    saveState(); renderAll(); closeModal(); toast('Saldo awal disimpan');
+  };
+}
+
+function openGoalModal(){
+  openModal(`
+    <div class="modal-icon ok"><i data-lucide="target"></i></div>
+    <h3>TUJUAN TABUNGAN BARU</h3>
+    <p>Buat tujuan menabung. Anda dapat menambahkan foto barang impian.</p>
+    <div class="field">
+      <label><i data-lucide="type"></i> NAMA TUJUAN</label>
+      <input type="text" id="goalName" placeholder="Contoh: Beli Laptop Gaming">
+    </div>
+    <div class="field">
+      <label><i data-lucide="banknote"></i> TARGET DANA (Rp)</label>
+      <input type="number" id="goalTarget" placeholder="0">
+    </div>
+    <div class="modal-actions">
+      <button class="btn ghost small" data-act="cancel"><i data-lucide="x"></i> BATAL</button>
+      <button class="btn primary small" data-act="ok"><i data-lucide="check"></i> BUAT</button>
+    </div>`);
+  modalContent.querySelector('[data-act="cancel"]').onclick = closeModal;
+  modalContent.querySelector('[data-act="ok"]').onclick = ()=>{
+    const name = document.getElementById('goalName').value.trim();
+    const target = Number(document.getElementById('goalTarget').value);
+    if(!name || !target || target <= 0){ toast('Lengkapi nama dan target'); return; }
+    state.goals.push({ id:uid(), name, target, saved:0, photo:null });
+    saveState(); renderGoals(); closeModal(); toast('Tujuan dibuat: ' + name);
+  };
+}
+
+/* ============ SIDEBAR ============ */
+const hamburger = document.getElementById('hamburger');
+const sidebar = document.getElementById('sidebar');
+const sidebarBack = document.getElementById('sidebarBack');
+
+function toggleSidebar(open){
+  const isOpen = open !== undefined ? open : !sidebar.classList.contains('open');
+  hamburger.classList.toggle('open', isOpen);
+  sidebar.classList.toggle('open', isOpen);
+  sidebarBack.classList.toggle('open', isOpen);
+}
+hamburger.addEventListener('click', ()=>toggleSidebar());
+sidebarBack.addEventListener('click', ()=>toggleSidebar(false));
+
+document.getElementById('sbLogo').addEventListener('click', ()=>{ toggleSidebar(false); setTimeout(openLogoModal, 250); });
+document.getElementById('sbBanner').addEventListener('click', ()=>{ toggleSidebar(false); setTimeout(openBannerModal, 250); });
+document.getElementById('sbSetBalance').addEventListener('click', ()=>{ toggleSidebar(false); setTimeout(openSetBalance, 250); });
+document.getElementById('sbReset').addEventListener('click', ()=>{
+  toggleSidebar(false);
+  setTimeout(()=>{
+    confirmDialog({
+      iconName:'trash-2', title:'RESET SEMUA DATA?',
+      message:'Semua data akan <b style="color:#fff">dihapus permanen</b>. Tindakan ini tidak dapat dibatalkan.',
+      onConfirm:()=>{ state = structuredClone(defaultState); saveState(); renderAll(); toast('Semua data direset'); }
+    });
+  }, 250);
+});
+document.getElementById('sbExport').addEventListener('click', ()=>{
+  toggleSidebar(false);
+  setTimeout(()=>{
+    const blob = new Blob([JSON.stringify(state, null, 2)], { type:'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = `nexus-finance-${todayStr()}.json`; a.click();
+    URL.revokeObjectURL(url);
+    toast('Data diexport');
+  }, 250);
+});
+document.getElementById('sbImport').addEventListener('click', ()=>{
+  toggleSidebar(false);
+  setTimeout(()=>{
+    const input = document.createElement('input');
+    input.type = 'file'; input.accept = '.json,application/json';
+    input.onchange = ()=>{
+      const file = input.files[0]; if(!file) return;
+      const reader = new FileReader();
+      reader.onload = ev => {
+        try{
+          const p = JSON.parse(ev.target.result);
+          if(typeof p.startingBalance !== 'number' || !Array.isArray(p.transactions) || !Array.isArray(p.goals)) throw new Error('format');
+          confirmDialog({
+            iconName:'upload', icon:'ok', title:'IMPORT DATA?', confirmText:'IMPORT', confirmClass:'primary',
+            message:`Data berisi <b style="color:#fff">${p.transactions.length} transaksi</b> dan <b style="color:#fff">${p.goals.length} tujuan</b> akan menggantikan data saat ini.`,
+            onConfirm:()=>{
+              let banners = ['', '', ''];
+              if(Array.isArray(p.banners)) banners = [p.banners[0]||'', p.banners[1]||'', p.banners[2]||''];
+              state = {
+                startingBalance:p.startingBalance,
+                transactions:p.transactions,
+                goals:p.goals,
+                logoUrl: typeof p.logoUrl === 'string' ? p.logoUrl : '',
+                banners
+              };
+              saveState(); renderAll(); toast('Data berhasil diimport');
+            }
+          });
+        }catch(err){ toast('File tidak valid'); }
+      };
+      reader.readAsText(file);
+    };
+    input.click();
+  }, 250);
+});
+
+/* ============ INIT ============ */
+document.addEventListener('DOMContentLoaded', ()=>{
+  initParticles();
+  document.getElementById('txDate').value = todayStr();
+  lucide.createIcons();
+  renderAll();
+
+  document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click', ()=>{
+    document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active', x===t));
+    document.querySelectorAll('.panel').forEach(p=>p.classList.toggle('active', p.id==='panel-'+t.dataset.tab));
+    lucide.createIcons();
+  }));
+
+  document.getElementById('addIncomeBtn').addEventListener('click', ()=>{
+    document.querySelector('[data-tab="transaksi"]').click();
+    document.getElementById('txType').value='in';
+  });
+  document.getElementById('addExpenseBtn').addEventListener('click', ()=>{
+    document.querySelector('[data-tab="transaksi"]').click();
+    document.getElementById('txType').value='out';
+  });
+  document.getElementById('addGoalBtn').addEventListener('click', openGoalModal);
+  document.getElementById('txForm').addEventListener('submit', addTx);
+  document.getElementById('txCancel').addEventListener('click', ()=>{
+    document.getElementById('txForm').reset();
+    document.getElementById('txDate').value = todayStr();
+  });
+
+  /* visibilitychange: pakai startBannerTimer (single-source) */
+  document.addEventListener('visibilitychange', ()=>{
+    if(document.hidden){
+      stopBannerTimer();
+    } else {
+      startBannerTimer();
+    }
+  });
+});
+</script>
+</body>
+</html>
