@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>HAM FINANCE</title>
+<title>NEXUS FINANCE</title>
 <script src="https://unpkg.com/lucide@latest"></script>
 <style>
 :root{
@@ -62,8 +62,6 @@ body{
 .brand h1 span{background:linear-gradient(90deg,#fff,#22d3ee);-webkit-background-clip:text;background-clip:text;color:transparent}
 .brand p{font-size:8.5px;color:var(--muted);letter-spacing:2px;margin-top:3px}
 .top-actions{display:flex;gap:8px;align-items:center}
-
-/* Banner */
 .banner{position:relative;width:100%;height:180px;border-radius:var(--radius);overflow:hidden;
   margin-bottom:18px;border:1px solid var(--line);
   background:linear-gradient(120deg,#0a1a3d,#0b3fb0 55%,#093a8c);
@@ -320,7 +318,7 @@ tbody tr:hover{background:rgba(30,107,255,.06)}
     <div class="brand">
       <div class="logo" id="brandLogo"><i data-lucide="hexagon"></i></div>
       <div>
-        <h1 class="glitch" data-text="HAM FINANCE">HAM <span>FINANCE</span></h1>
+        <h1 class="glitch" data-text="NEXUS FINANCE">NEXUS <span>FINANCE</span></h1>
         <p>PERSONAL WEALTH CONTROL</p>
       </div>
     </div>
@@ -559,7 +557,7 @@ function renderBranding(){
   lucide.createIcons();
 }
 
-/* ============ BANNER CAROUSEL (timer single-source) ============ */
+/* ============ BANNER CAROUSEL ============ */
 let bannerTimer = null;
 let bannerIndex = 0;
 let swipeBound = false;
@@ -569,10 +567,10 @@ function stopBannerTimer(){
 }
 
 function startBannerTimer(){
-  stopBannerTimer(); /* SELALU clear dulu — ini kunci perbaikan */
+  stopBannerTimer();
   const total = document.querySelectorAll('#bannerSlides .slide').length;
-  if(total < 2) return;            /* tidak perlu timer kalau < 2 slide */
-  if(document.hidden) return;      /* tab tidak aktif, skip */
+  if(total < 2) return;
+  if(document.hidden) return;
   bannerTimer = setInterval(()=>{
     const t = document.querySelectorAll('#bannerSlides .slide').length;
     if(t > 1) goToSlide((bannerIndex + 1) % t);
@@ -584,8 +582,9 @@ function renderBanner(){
   const dotsWrap = document.getElementById('bannerDots');
   const banner = document.getElementById('banner');
 
-  /* Ambil semua banner yang valid, TANPA mengubah urutan.
-     Kita pakai index asli supaya 3 slot terisi = 3 slide. */
+  /* Simpan pasangan (url, slot) supaya urutan tetap terjaga.
+     Kalau slot[1] kosong & slot[2] isi, akan muncul 2 slide (slot 0 & 2). 
+     Kalau user isi 3 slot, muncul 3 slide. */
   const validBanners = [];
   state.banners.forEach((b,i)=>{
     if(b && isImageSrc(b)) validBanners.push({url:b, slot:i});
@@ -610,9 +609,9 @@ function renderBanner(){
 
   dotsWrap.querySelectorAll('.dot-btn').forEach(btn=>{
     btn.addEventListener('click', ()=>{
-      stopBannerTimer();               /* pause saat klik dot */
+      stopBannerTimer();
       goToSlide(parseInt(btn.dataset.i));
-      startBannerTimer();              /* restart */
+      startBannerTimer();
     });
   });
 
@@ -635,11 +634,9 @@ function goToSlide(i){
   dots.forEach((d,idx)=>d.classList.toggle('active', idx===i));
 }
 
-/* Swipe / Drag — di-bind SEKALI saja */
 function bindSwipe(){
   const banner = document.getElementById('banner');
   const slidesWrap = document.getElementById('bannerSlides');
-
   let startX = 0, startY = 0;
   let dragging = false;
   let lockedDir = null;
@@ -694,10 +691,9 @@ function bindSwipe(){
       if(current) current.style.transform = '';
     }
     lockedDir = null;
-    startBannerTimer();   /* restart timer — bukan resumeAuto terpisah */
+    startBannerTimer();
   }
 
-  /* Mouse */
   banner.addEventListener('mousedown', e=>{
     if(e.button !== 0) return;
     if(e.target.closest('.banner-nav') || e.target.closest('.dots')) return;
@@ -714,7 +710,6 @@ function bindSwipe(){
   });
   slidesWrap.addEventListener('dragstart', e=>e.preventDefault());
 
-  /* Touch */
   banner.addEventListener('touchstart', e=>{
     if(e.target.closest('.banner-nav') || e.target.closest('.dots')) return;
     const t = e.touches[0];
@@ -744,7 +739,6 @@ function bindSwipe(){
     startBannerTimer();
   });
 
-  /* Panah navigasi */
   document.getElementById('navPrev').addEventListener('click', e=>{
     e.stopPropagation();
     stopBannerTimer();
@@ -878,8 +872,25 @@ function promptDialog({title, message, label, placeholder='', defaultValue='', t
   modalContent.querySelector('[data-act="ok"]').onclick = ()=>{ const val = input.value.trim(); closeModal(); onConfirm(val); };
 }
 
-function openImagePicker({ title, description, currentValue, onSave }){
+/* ============ IMAGE PICKER (FIXED) ============ */
+/*
+  PERBAIKAN:
+  1. Ganti variabel tunggal `pickedValue` jadi 3 state terpisah:
+     - `uploadedDataUrl` (hasil upload file, diisi async)
+     - `linkValue` (hasil ketik link)
+     - `lastPicked` (nilai final dari apapun yang terakhir dipilih)
+  2. Tombol SIMPAN mengambil nilai berdasarkan MODE aktif:
+     - mode='upload' → pakai uploadedDataUrl
+     - mode='link' → pakai linkValue
+  3. FileReader.onload SETELAH render preview langsung update `uploadedDataUrl`,
+     jadi apapun timing-nya, saat save datanya sudah tersedia.
+  4. onSave dipanggil SETELAH modal close animation selesai, tidak lagi menimpa
+     render berikutnya.
+*/
+function openImagePicker({ title, description, currentValue, onSave, onDone }){
   const id = 'f_' + Math.random().toString(36).slice(2,8);
+  const startValue = currentValue || '';
+
   openModal(`
     <div class="modal-icon ok"><i data-lucide="image"></i></div>
     <h3>${escapeHtml(title)}</h3>
@@ -889,7 +900,7 @@ function openImagePicker({ title, description, currentValue, onSave }){
       <button type="button" data-mode="link"><i data-lucide="link"></i> LINK</button>
     </div>
     <div class="preview-box" id="previewBox_${id}">
-      ${currentValue && isImageSrc(currentValue) ? `<img src="${escapeHtml(currentValue)}" alt="preview">` : `<i data-lucide="image"></i>`}
+      ${startValue && isImageSrc(startValue) ? `<img src="${escapeHtml(startValue)}" alt="preview">` : `<i data-lucide="image"></i>`}
     </div>
     <div data-mode-panel="upload">
       <label class="dropzone" for="${id}">
@@ -903,7 +914,7 @@ function openImagePicker({ title, description, currentValue, onSave }){
       <div class="divider-or">ATAU PAKAI LINK</div>
       <div class="field" style="margin-bottom:0">
         <label><i data-lucide="link"></i> URL FOTO</label>
-        <input type="url" id="linkInput_${id}" placeholder="https://..." value="${currentValue && isValidUrl(currentValue) ? escapeHtml(currentValue) : ''}">
+        <input type="url" id="linkInput_${id}" placeholder="https://..." value="${startValue && isValidUrl(startValue) ? escapeHtml(startValue) : ''}">
       </div>
     </div>
     <div class="modal-actions">
@@ -918,41 +929,58 @@ function openImagePicker({ title, description, currentValue, onSave }){
   const tabBtns    = modalContent.querySelectorAll('.tab-mini button');
   const panels     = modalContent.querySelectorAll('[data-mode-panel]');
 
-  let pickedValue = currentValue || '';
+  let uploadedDataUrl = '';   /* hasil file upload */
+  let linkValue = linkInput.value.trim(); /* nilai link (bisa kosong) */
   let mode = 'upload';
+
+  function refreshPreview(){
+    const active = (mode === 'upload') ? uploadedDataUrl : linkValue;
+    if(!active){
+      previewBox.innerHTML = `<i data-lucide="image"></i>`;
+      lucide.createIcons();
+      return;
+    }
+    if(isImageSrc(active)){
+      previewBox.innerHTML = `<img src="${escapeHtml(active)}" alt="preview" onerror="this.parentElement.innerHTML='<span style=&quot;font-size:9px;color:#ef4444&quot;>Gambar gagal dimuat</span>'">`;
+    } else {
+      previewBox.innerHTML = `<span style="font-size:9px;color:var(--muted)">Link belum valid</span>`;
+    }
+  }
 
   function setMode(m){
     mode = m;
     tabBtns.forEach(b=>b.classList.toggle('active', b.dataset.mode===m));
     panels.forEach(p=>p.style.display = (p.dataset.modePanel===m) ? '' : 'none');
+    refreshPreview();
   }
   tabBtns.forEach(b=>b.addEventListener('click', ()=>setMode(b.dataset.mode)));
 
   fileInput.addEventListener('change', e=>{
     const f = e.target.files[0]; if(!f) return;
-    if(f.size > 2.5*1024*1024){ toast('Maksimal 2.5MB'); e.target.value=''; return; }
+    if(f.size > 2.5*1024*1024){
+      toast('Maksimal 2.5MB');
+      e.target.value='';
+      return;
+    }
     const reader = new FileReader();
-    reader.onload = ev=>{ pickedValue = ev.target.result; previewBox.innerHTML = `<img src="${pickedValue}" alt="preview">`; };
+    reader.onload = ev=>{
+      uploadedDataUrl = ev.target.result; /* simpan permanen */
+      refreshPreview();
+      toast('Foto siap disimpan');
+    };
     reader.onerror = ()=> toast('Gagal membaca file');
     reader.readAsDataURL(f);
   });
 
   linkInput.addEventListener('input', ()=>{
-    const v = linkInput.value.trim();
-    pickedValue = v;
-    if(v && isValidUrl(v)){
-      previewBox.innerHTML = `<img src="${escapeHtml(v)}" alt="preview" onerror="this.parentElement.innerHTML='<span style=&quot;font-size:9px;color:#ef4444&quot;>Gambar gagal dimuat</span>'">`;
-    } else if(!v){
-      previewBox.innerHTML = `<i data-lucide="image"></i>`;
-      lucide.createIcons();
-    } else {
-      previewBox.innerHTML = `<span style="font-size:9px;color:var(--muted)">Link belum valid</span>`;
-    }
+    linkValue = linkInput.value.trim();
+    if(mode === 'link') refreshPreview();
   });
 
   modalContent.querySelector('[data-act="cancel"]').onclick = closeModal;
   modalContent.querySelector('[data-act="remove"]').onclick = ()=>{
-    closeModal(); setTimeout(()=>{ onSave(''); toast('Foto dihapus'); }, 220);
+    closeModal();
+    setTimeout(()=>{ onSave(''); if(onDone) onDone(); toast('Foto dihapus'); }, 220);
   };
   modalContent.querySelector('[data-act="save"]').onclick = ()=>{
     let val = '';
@@ -962,22 +990,38 @@ function openImagePicker({ title, description, currentValue, onSave }){
       if(v && !isImageSrc(v)){ toast('Link bukan gambar'); return; }
       val = v;
     } else {
-      val = pickedValue || '';
+      val = uploadedDataUrl;
+      if(!val){
+        toast('Belum pilih foto — klik area upload dulu');
+        return;
+      }
     }
-    closeModal(); setTimeout(()=>{ onSave(val); toast('Berhasil disimpan'); }, 220);
+    closeModal();
+    setTimeout(()=>{ onSave(val); if(onDone) onDone(); toast('Berhasil disimpan'); }, 220);
   };
 }
 
+/* ============ LOGO & BANNER MODALS ============ */
 function openLogoModal(){
   openImagePicker({
     title:'GANTI LOGO',
     description:'Upload foto logo atau tempel link gambar online. Rasio disarankan 1:1 (kotak).',
     currentValue: state.logoUrl,
-    onSave:(val)=>{ state.logoUrl = val; saveState(); renderBranding(); }
+    onSave:(val)=>{
+      state.logoUrl = val;
+      saveState();
+      renderBranding();
+    }
   });
 }
 
-function openBannerModal(){
+/* Banner modal — supaya setelah picker selesai, modal banner dibuka ulang
+   dengan PREVIEW BARU, tapi hanya sekali jalan dan tanpa race condition.
+   Kita pakai flag `reopening` untuk memastikan tidak loop. */
+function openBannerModal(opts){
+  opts = opts || {};
+  const reopenAfter = opts.reopenAfter || false;
+
   const slotCards = state.banners.map((b,i)=>{
     const preview = b && isImageSrc(b)
       ? `<img src="${escapeHtml(b)}" alt="">`
@@ -986,7 +1030,7 @@ function openBannerModal(){
       <label><i data-lucide="panel-top"></i> FOTO ${i+1} ${b ? '<span style="color:var(--cyan)">· TERISI</span>' : ''}</label>
       <div style="display:flex;gap:7px;align-items:center">
         <div class="preview-box" style="height:52px;width:90px;margin-bottom:0;flex-shrink:0">${preview}</div>
-        <button class="btn ghost small" data-edit="${i}" style="flex:1"><i data-lucide="upload"></i> PILIH</button>
+        <button class="btn ghost small" data-edit="${i}" style="flex:1"><i data-lucide="upload"></i> ${b?'GANTI':'PILIH'}</button>
         <button class="btn danger small" data-clear="${i}"><i data-lucide="x"></i></button>
       </div>
     </div>`;
@@ -1015,7 +1059,12 @@ function openBannerModal(){
           state.banners[i] = val;
           saveState();
           renderBanner();
-          setTimeout(()=>openBannerModal(), 50);
+        },
+        onDone:()=>{
+          /* Buka ulang modal banner supaya slot preview ter-refresh,
+             dan user bisa lanjut isi slot lain. Delay kecil agar animasi
+             close selesai dulu. */
+          setTimeout(()=>openBannerModal({ reopenAfter:true }), 260);
         }
       });
     });
@@ -1026,7 +1075,7 @@ function openBannerModal(){
       state.banners[i] = '';
       saveState();
       renderBanner();
-      openBannerModal();
+      openBannerModal({ reopenAfter:true });
       toast('Slot dihapus');
     });
   });
@@ -1170,7 +1219,7 @@ hamburger.addEventListener('click', ()=>toggleSidebar());
 sidebarBack.addEventListener('click', ()=>toggleSidebar(false));
 
 document.getElementById('sbLogo').addEventListener('click', ()=>{ toggleSidebar(false); setTimeout(openLogoModal, 250); });
-document.getElementById('sbBanner').addEventListener('click', ()=>{ toggleSidebar(false); setTimeout(openBannerModal, 250); });
+document.getElementById('sbBanner').addEventListener('click', ()=>{ toggleSidebar(false); setTimeout(()=>openBannerModal(), 250); });
 document.getElementById('sbSetBalance').addEventListener('click', ()=>{ toggleSidebar(false); setTimeout(openSetBalance, 250); });
 document.getElementById('sbReset').addEventListener('click', ()=>{
   toggleSidebar(false);
@@ -1257,13 +1306,9 @@ document.addEventListener('DOMContentLoaded', ()=>{
     document.getElementById('txDate').value = todayStr();
   });
 
-  /* visibilitychange: pakai startBannerTimer (single-source) */
   document.addEventListener('visibilitychange', ()=>{
-    if(document.hidden){
-      stopBannerTimer();
-    } else {
-      startBannerTimer();
-    }
+    if(document.hidden){ stopBannerTimer(); }
+    else { startBannerTimer(); }
   });
 });
 </script>
